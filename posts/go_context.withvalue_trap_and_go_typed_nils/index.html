@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+    <link rel="manifest" href="/images/site.webmanifest">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <title>Go: Context.WithValue trap and Go’s typed nils | Nikolay Bystritskiy&#39;s Blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+    <header>
+
+  <nav>
+    <ul>
+      
+      
+      <li class="pull-left ">
+        <a href="https://nbys.github.io">~/nikolay bystritskiy&#39;s blog</a>
+      </li>
+      
+
+      
+
+    </ul>
+  </nav>
+</header>
+
+  </head>
+
+  <body>
+    <br/>
+
+<div class="article-meta">
+<h1><span class="title">Go: Context.WithValue trap and Go’s typed nils</span></h1>
+
+<h2 class="date">2017/08/30</h2>
+<p class="terms">
+  
+  
+  
+  
+  
+</p>
+</div>
+
+
+<div class="content-wrapper">
+  <main>
+    <p>There are a lot of discussions about Go 2.0 and what should be done in the upcoming major release. Some circulations were about Context. So far I haven’t heard anything optimistic about that.</p>
+<p>Today I discovered by myself: how quickly a newbie (as me) can mess things up using Context. Maybe I reproduce the only case you should not use Context but anyway.
+I decided to implement middleware to pick the corresponding template depending on the path in HTTP request.</p>
+<p><img src="/img/go_context_pitfall/1.png" alt="1"></p>
+<p>My middleware (function loadTemplate) picks a correct template (html.Template) and send it over with Context.</p>
+<p><img src="/img/go_context_pitfall/2.png" alt="2"></p>
+<p>Function getTemplate initiates a template based on the path in the HTTP request. The function returns nil and an error if the requested template was not found. Logically it is to handle the error here straight away. But I decided to skip the error handling here and send <!-- raw HTML omitted --> template to Context.</p>
+<p>Firstly in renderTemplate function I read from Context and try to check if the object is nil (line 60, 62):</p>
+<p><img src="/img/go_context_pitfall/3.png" alt="3"></p>
+<p>That is wrong because I handle Context.Value like the output from ordinary function or map. But Context returns not some specific type but interface{}. So you have to use type assertion instead to reach underlying value and check if it’s nil:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#75715e">// Line 62 correct:
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span> <span style="color:#a6e22e">t</span>.(<span style="color:#f92672">*</span><span style="color:#a6e22e">template</span>.<span style="color:#a6e22e">Template</span>) <span style="color:#f92672">==</span> <span style="color:#66d9ef">nil</span>
+</code></pre></div><p>The check in line 62 of my code was skipped.</p>
+<p>But look at line 67. Would you expect this type of assertion to be failed if “t” is nil? I expected so and I was wrong. Type assertion works perfectly here. Then I discovered what I haven’t known before: even the nil in Go has a type. If you look in debugger what type variable “t” is:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#66d9ef">nil</span> &lt;<span style="color:#f92672">*</span><span style="color:#a6e22e">temlplate</span>.<span style="color:#a6e22e">Template</span>&gt;
+</code></pre></div><p>Statements like this make more sense for me now:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#a6e22e">a</span> <span style="color:#f92672">:=</span> (<span style="color:#f92672">*</span><span style="color:#66d9ef">error</span>)(<span style="color:#66d9ef">nil</span>)
+<span style="color:#75715e">// nil for &lt;*error&gt;
+</span></code></pre></div><p>Context is not very newbie-friendly thing in Go. It is not so easy as it is stated on Go Blog. You have to understand a lot of concepts of language before even consider using it.</p>
+
+    <a href="/"> >> Home</a>
+  </main>
+</div>
+    <footer>
+      
+<script>
+(function() {
+  function center_el(tagName) {
+    var tags = document.getElementsByTagName(tagName), i, tag;
+    for (i = 0; i < tags.length; i++) {
+      tag = tags[i];
+      var parent = tag.parentElement;
+      
+      if (parent.childNodes.length === 1) {
+        
+        if (parent.nodeName === 'A') {
+          parent = parent.parentElement;
+          if (parent.childNodes.length != 1) continue;
+        }
+        if (parent.nodeName === 'P') parent.style.textAlign = 'center';
+      }
+    }
+  }
+  var tagNames = ['img', 'embed', 'object'];
+  for (var i = 0; i < tagNames.length; i++) {
+    center_el(tagNames[i]);
+  }
+})();
+</script>
+
+      
+    </footer>
+  </body>
+</html>
+

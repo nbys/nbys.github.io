@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+    <link rel="manifest" href="/images/site.webmanifest">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <title>ABAP 7.40 Inline Loop | Nikolay Bystritskiy&#39;s Blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+    <header>
+
+  <nav>
+    <ul>
+      
+      
+      <li class="pull-left ">
+        <a href="https://nbys.github.io">~/nikolay bystritskiy&#39;s blog</a>
+      </li>
+      
+
+      
+
+    </ul>
+  </nav>
+</header>
+
+  </head>
+
+  <body>
+    <br/>
+
+<div class="article-meta">
+<h1><span class="title">ABAP 7.40 Inline Loop</span></h1>
+
+<h2 class="date">2016/12/01</h2>
+<p class="terms">
+  
+  
+  
+  
+  
+</p>
+</div>
+
+
+<div class="content-wrapper">
+  <main>
+    <p>Despite not very programmer-friendly syntax of new features ABAP 7.40 you might have situations where it can be extremely useful.</p>
+<p>Occasionally I have to have nested loops. It is a case when I need to calculate some key figures over the dataset depending on the time interval (Start / End date). I try to explain this with an example.
+Let&rsquo;s say you have the internal table for the working hours of your external workers:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ABAP" data-lang="ABAP"><span style="color:#66d9ef">TYPES</span>: <span style="color:#66d9ef">BEGIN OF</span> ts_working_hours_extern,
+   employee_id <span style="color:#66d9ef">TYPE </span>e_id,
+   begda       <span style="color:#66d9ef">TYPE </span>begda,
+   endda       <span style="color:#66d9ef">TYPE </span>endda,
+   hours       <span style="color:#66d9ef">TYPE </span>i,
+ <span style="color:#66d9ef">END OF</span> ts_working_hours_extern.
+<span style="color:#66d9ef">TYPES</span> tt_working_hours_extern <span style="color:#66d9ef">TYPE STANDARD TABLE OF</span> ts_working_hours_extern.
+<span style="color:#66d9ef">DATA</span> lt_working_hours <span style="color:#66d9ef">TYPE </span>tt_working_hours_extern.
+</code></pre></div><p>The second internal table contains the sales produced by external workers:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ABAP" data-lang="ABAP"><span style="color:#66d9ef">TYPES</span>: <span style="color:#66d9ef">BEGIN OF</span> ts_sales,
+   sale_id     <span style="color:#66d9ef">TYPE </span>s_id,
+   employee_id <span style="color:#66d9ef">TYPE </span>begda,
+   <span style="color:#66d9ef">date</span>        <span style="color:#66d9ef">TYPE </span>d,
+ <span style="color:#66d9ef">END OF</span> ts_sales.
+<span style="color:#66d9ef">TYPES</span> tt_sales <span style="color:#66d9ef">TYPE STANDARD TABLE OF</span> ts_sales.
+<span style="color:#66d9ef">DATA</span> lt_sales <span style="color:#66d9ef">TYPE </span>tt_sales.
+</code></pre></div><p>Your task is to calculate the ratio of working hours to the result of work for each external worker.
+Earlier you go:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ABAP" data-lang="ABAP"><span style="color:#66d9ef">LOOP AT </span>lt_working_hours ASSAGNING &lt;fs_wh&gt;.
+  <span style="color:#66d9ef">CLEAR</span> ls_result.
+  <span style="color:#66d9ef">MOVE-CORRESPONDING</span> &lt;fs_wh&gt; <span style="color:#66d9ef">TO</span> ls_result.
+<span style="color:#66d9ef">LOOP AT </span>lt_sales <span style="color:#66d9ef">ASSIGNING</span> &lt;fs_sales&gt; 
+                   <span style="color:#66d9ef">WHERE</span> employee_id <span style="color:#f92672">=</span> &lt;fs_wh&gt;<span style="color:#f92672">-</span>employee_id
+                     <span style="color:#f92672">AND</span> <span style="color:#66d9ef">date</span> <span style="color:#f92672">&lt;=</span> &lt;fs_wh&gt;<span style="color:#f92672">-</span>endda
+                     <span style="color:#f92672">AND</span> <span style="color:#66d9ef">date</span> <span style="color:#f92672">&gt;=</span> &lt;fs_wh&gt;<span style="color:#f92672">-</span>begda.
+    ls_result<span style="color:#f92672">-</span>number_sales <span style="color:#f92672">=</span> ls_result<span style="color:#f92672">-</span>number_sales <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>.
+ <span style="color:#66d9ef">ENDLOOP</span>.
+ <span style="color:#66d9ef">APPEND</span> ls_result <span style="color:#66d9ef">TO</span> lt_result.
+<span style="color:#66d9ef">ENDLOOP</span>.
+</code></pre></div><p>Using ABAP 7.40 you can achieve the same the way faster:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ABAP" data-lang="ABAP"><span style="color:#66d9ef">LOOP AT </span>lt_working_hours ASSAGNING &lt;fs_wh&gt;.
+  <span style="color:#66d9ef">CLEAR</span> ls_result.
+  <span style="color:#66d9ef">MOVE-CORRESPONDING</span> &lt;fs_wh&gt; <span style="color:#66d9ef">TO</span> ls_result.
+  <span style="color:#66d9ef">DATA</span>(lt_sales_wa) <span style="color:#f92672">=</span> <span style="color:#66d9ef">VALUE</span> tt_sales( <span style="color:#66d9ef">FOR</span> wa <span style="color:#66d9ef">in</span> lt_sales )
+                    ( <span style="color:#66d9ef">WHERE</span> employee_id <span style="color:#f92672">=</span> &lt;fs_wh&gt;<span style="color:#f92672">-</span>employee_id
+                     <span style="color:#f92672">AND</span> <span style="color:#66d9ef">date</span> <span style="color:#f92672">&lt;=</span> &lt;fs_wh&gt;<span style="color:#f92672">-</span>endda
+                     <span style="color:#f92672">AND</span> <span style="color:#66d9ef">date</span> <span style="color:#f92672">&gt;=</span> &lt;fs_wh&gt;<span style="color:#f92672">-</span>begda )
+                    ( wa ) ).
+  ls_result<span style="color:#f92672">-</span>number_sales <span style="color:#f92672">=</span>  <span style="color:#66d9ef">lines</span>( lt_sales_wa ).
+  <span style="color:#66d9ef">APPEND</span> ls_result <span style="color:#66d9ef">TO</span> lt_result.
+<span style="color:#66d9ef">ENDLOOP</span>.
+</code></pre></div><p>If you have a large dataset of sales the inline loop can improve your performance significantly.
+But if you try to activate this code you’ll get an error message saying that dynamic type can’t be constructed. As it turned out the type tt_sales has to be a table with a key. If you can’t have a key in your internal table you can use newly introduced DEFAULT KEY addition. Basically, the whole line of your internal table becomes a key:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ABAP" data-lang="ABAP"><span style="color:#66d9ef">TYPES</span> tt_sales <span style="color:#66d9ef">TYPE STANDARD TABLE OF</span> ts_sales <span style="color:#66d9ef">WITH</span> <span style="color:#66d9ef">DEFAULT</span> <span style="color:#66d9ef">KEY</span>.
+</code></pre></div>
+    <a href="/"> >> Home</a>
+  </main>
+</div>
+    <footer>
+      
+<script>
+(function() {
+  function center_el(tagName) {
+    var tags = document.getElementsByTagName(tagName), i, tag;
+    for (i = 0; i < tags.length; i++) {
+      tag = tags[i];
+      var parent = tag.parentElement;
+      
+      if (parent.childNodes.length === 1) {
+        
+        if (parent.nodeName === 'A') {
+          parent = parent.parentElement;
+          if (parent.childNodes.length != 1) continue;
+        }
+        if (parent.nodeName === 'P') parent.style.textAlign = 'center';
+      }
+    }
+  }
+  var tagNames = ['img', 'embed', 'object'];
+  for (var i = 0; i < tagNames.length; i++) {
+    center_el(tagNames[i]);
+  }
+})();
+</script>
+
+      
+    </footer>
+  </body>
+</html>
+

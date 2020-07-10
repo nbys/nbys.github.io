@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Nikolay Bystritskiy&#39;s Blog</title>
+    <link>https://nbys.github.io/</link>
+    <description>Recent content on Nikolay Bystritskiy&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 30 Aug 2017 14:30:46 +0200</lastBuildDate>
+    
+	<atom:link href="https://nbys.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Go: Context.WithValue trap and Go’s typed nils</title>
+      <link>https://nbys.github.io/posts/go_context.withvalue_trap_and_go_typed_nils/</link>
+      <pubDate>Wed, 30 Aug 2017 14:30:46 +0200</pubDate>
+      
+      <guid>https://nbys.github.io/posts/go_context.withvalue_trap_and_go_typed_nils/</guid>
+      <description>There are a lot of discussions about Go 2.0 and what should be done in the upcoming major release. Some circulations were about Context. So far I haven’t heard anything optimistic about that.
+Today I discovered by myself: how quickly a newbie (as me) can mess things up using Context. Maybe I reproduce the only case you should not use Context but anyway. I decided to implement middleware to pick the corresponding template depending on the path in HTTP request.</description>
+    </item>
+    
+    <item>
+      <title>Bug: Unmarshal in loop (Golang)</title>
+      <link>https://nbys.github.io/posts/bug_unmarshal_in_loop_golang/</link>
+      <pubDate>Sun, 14 May 2017 14:26:30 +0200</pubDate>
+      
+      <guid>https://nbys.github.io/posts/bug_unmarshal_in_loop_golang/</guid>
+      <description>I’ve just stumbled into the bug trying to unmarshal the entries from boltdb. Here is my code:
+// Get all entities from boltdb var data [][]byte if data, err = db.GetAll(bucketTwitterDatasources); err != nil { return nil, err } // Unmarshal values and keep them in the slice var ds TwitterDataSource &amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt; Wrong! for _, d := range data { if err = json.Unmarshal(d, &amp;amp;ds); err != nil { log.Printf(&amp;#34;[ERROR] %s&amp;#34;, err.</description>
+    </item>
+    
+    <item>
+      <title>ABAP 7.40 Inline Loop</title>
+      <link>https://nbys.github.io/posts/abap_7.40_inline_loop/</link>
+      <pubDate>Thu, 01 Dec 2016 14:20:29 +0200</pubDate>
+      
+      <guid>https://nbys.github.io/posts/abap_7.40_inline_loop/</guid>
+      <description>Despite not very programmer-friendly syntax of new features ABAP 7.40 you might have situations where it can be extremely useful.
+Occasionally I have to have nested loops. It is a case when I need to calculate some key figures over the dataset depending on the time interval (Start / End date). I try to explain this with an example. Let&amp;rsquo;s say you have the internal table for the working hours of your external workers:</description>
+    </item>
+    
+    <item>
+      <title>How I tried to do things asynchronously in Golang</title>
+      <link>https://nbys.github.io/posts/async_in_golang/</link>
+      <pubDate>Sun, 11 Sep 2016 13:45:48 +0200</pubDate>
+      
+      <guid>https://nbys.github.io/posts/async_in_golang/</guid>
+      <description>From the beginning, I want to emphasize that I’m not a professional Golang developer. If you are a newbie in Golang (like me) you might be interested to get familiar with the concept of goroutines. I hope this post can help you. Take a look at some basic examples here https://gobyexample.com/goroutines.
+When I first saw the concept of goroutines I immediately fell in love with that. This was the main reason why I started occasionally programming in Go.</description>
+    </item>
+    
+  </channel>
+</rss>

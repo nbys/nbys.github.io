@@ -3,17 +3,22 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://nbys.github.io/posts/go_context.withvalue_trap_and_go_typed_nils/</loc>
-    <lastmod>2017-08-30T14:30:46+02:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://nbys.github.io/</loc>
-    <lastmod>2017-08-30T14:30:46+02:00</lastmod>
+    <lastmod>2021-02-21T12:45:22+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://nbys.github.io/posts/</loc>
+    <lastmod>2021-02-21T12:45:22+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://nbys.github.io/posts/abap_internal_tables_sql/</loc>
+    <lastmod>2021-02-21T12:45:22+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://nbys.github.io/posts/go_context.withvalue_trap_and_go_typed_nils/</loc>
     <lastmod>2017-08-30T14:30:46+02:00</lastmod>
   </url>
   

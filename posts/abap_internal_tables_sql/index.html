@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+    <link rel="manifest" href="/images/site.webmanifest">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <title>Query ABAP internal tables using SQL | Nikolay Bystritskiy&#39;s Blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+    <header>
+
+  <nav>
+    <ul>
+      
+      
+      <li class="pull-left ">
+        <a href="https://nbys.github.io">~/nikolay bystritskiy&#39;s blog</a>
+      </li>
+      
+
+      
+
+    </ul>
+  </nav>
+</header>
+
+  </head>
+
+  <body>
+    <br/>
+
+<div class="article-meta">
+<h1><span class="title">Query ABAP internal tables using SQL</span></h1>
+
+<h2 class="date">2021/02/21</h2>
+<p class="terms">
+  
+  
+  
+  
+  
+</p>
+</div>
+
+
+<div class="content-wrapper">
+  <main>
+    <p>Recently I discovered one feature of ABAP which I wanted to exist a long time ago.</p>
+<p>I had a task in my project to implement OData Service. Unfortunately, I could not use CDS-View to generate OData Service, because data extraction was ABAP implemented legacy-code. I had to implement SAP Gateway Service (transaction code SEGW), then use the ABAP logic to get requested data:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ABAP" data-lang="ABAP"><span style="color:#66d9ef">DATA</span>(lref_srv) <span style="color:#f92672">=</span> NEW zcl_project_name_service_class( <span style="color:#66d9ef">id</span> <span style="color:#f92672">=</span> CONV <span style="color:#960050;background-color:#1e0010">#</span>( lv_id )).
+<span style="color:#66d9ef">DATA</span>(lt_entityset) <span style="color:#f92672">=</span> lref_srv<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get_data</span>().
+</code></pre></div><p>The client of this Gateway Service was a SAPUI5 application with diverse filter logic. The filters are somewhat combinations of other filters. They were sometimes even mutually exclusive. It would be very painful to reimplement this filter logic in Gateway Service from scratch. Fortunately, there is a way to get filters in ABAP:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ABAP" data-lang="ABAP"><span style="color:#66d9ef">DATA</span>(lv_sql) <span style="color:#f92672">=</span> io_tech_request_context<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get_osql_where_clause_convert</span>( ).
+</code></pre></div><p>This method converts input filters from url string to SQL where clause. For example, it converts <code>?$filter=(id eq '10001' and mandant eq '100')</code> to <code>ID = '10001 AND MANDANT = '100'</code>. It is very useful if your filter has many conditions.</p>
+<p>Now I have an internal table with all data to the given ID. But I need somehow filter this table according to filter conditions.
+It turned out, that you can query the internal table using SQL where clauses.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ABAP" data-lang="ABAP"><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> <span style="color:#960050;background-color:#1e0010">@</span>lt_entityset <span style="color:#66d9ef">as</span> _res <span style="color:#66d9ef">WHERE</span> (lv_sql) 
+ <span style="color:#66d9ef">INTO</span> <span style="color:#66d9ef">CORRESPONDING FIELDS OF</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#960050;background-color:#1e0010">@</span>et_entityset
+</code></pre></div><p>For some reason, you have to specify an alias to the table (_res).
+Also, the names of columns have to match to column names in the filter from the URL. Otherwise, you&rsquo;ll get a SQL exception.
+If it is your case you can use other cool features of the new ABAP - MOVE-CORRESPONDING(MAPPING) to create an auxiliary table with the correct column structure.</p>
+
+    <a href="/"> >> Home</a>
+  </main>
+</div>
+    <footer>
+      
+<script>
+(function() {
+  function center_el(tagName) {
+    var tags = document.getElementsByTagName(tagName), i, tag;
+    for (i = 0; i < tags.length; i++) {
+      tag = tags[i];
+      var parent = tag.parentElement;
+      
+      if (parent.childNodes.length === 1) {
+        
+        if (parent.nodeName === 'A') {
+          parent = parent.parentElement;
+          if (parent.childNodes.length != 1) continue;
+        }
+        if (parent.nodeName === 'P') parent.style.textAlign = 'center';
+      }
+    }
+  }
+  var tagNames = ['img', 'embed', 'object'];
+  for (var i = 0; i < tagNames.length; i++) {
+    center_el(tagNames[i]);
+  }
+})();
+</script>
+
+      
+    </footer>
+  </body>
+</html>
+

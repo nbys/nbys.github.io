@@ -6,10 +6,17 @@
     <description>Recent content in Posts on Nikolay Bystritskiy&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 30 Aug 2017 14:30:46 +0200</lastBuildDate>
-    
-	<atom:link href="https://nbys.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
-    
+    <lastBuildDate>Sun, 21 Feb 2021 12:45:22 +0100</lastBuildDate><atom:link href="https://nbys.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Query ABAP internal tables using SQL</title>
+      <link>https://nbys.github.io/posts/abap_internal_tables_sql/</link>
+      <pubDate>Sun, 21 Feb 2021 12:45:22 +0100</pubDate>
+      
+      <guid>https://nbys.github.io/posts/abap_internal_tables_sql/</guid>
+      <description>Recently I discovered one feature of ABAP which I wanted to exist a long time ago.
+I had a task in my project to implement OData Service. Unfortunately, I could not use CDS-View to generate OData Service, because data extraction was ABAP implemented legacy-code. I had to implement SAP Gateway Service (transaction code SEGW), then use the ABAP logic to get requested data:
+DATA(lref_srv) = NEW zcl_project_name_service_class( id = CONV #( lv_id )).</description>
+    </item>
     
     <item>
       <title>Go: Context.WithValue trap and Go’s typed nils</title>

@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-    <script>hljs.initHighlightingOnLoad();</script>
 
     <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
@@ -53,6 +50,7 @@
 </div>
 
 
+
 <div class="content-wrapper">
   <main>
     <p>From the beginning, I want to emphasize that I’m not a professional Golang developer. If you are a newbie in Golang (like me) you might be interested to get familiar with the concept of goroutines. I hope this post can help you. Take a look at some basic examples here <a href="https://gobyexample.com/goroutines">https://gobyexample.com/goroutines</a>.</p>
@@ -73,151 +71,151 @@
 <p>Close the “resultChannel”? But when? What if you close the channel but other goroutines are still trying to write to it? it’s a panic btw.</p>
 <p>Then I found this article in the “Go Blog”: <a href="https://blog.golang.org/pipelines">https://blog.golang.org/pipelines</a>. The article is great. Then I decided to implement a reusable solution that I could use later in other projects.</p>
 <p>First of all, I have to send the result of task execution from goroutine to the client. The result can be some value or an error. If I want to reuse my worker, the result has to be some dynamic type. Golang might be not very dynamic, but it has an empty interface: interface{}. I declare the function type which will return the value of type interface{}:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">TaskFunction</span> <span style="color:#66d9ef">func</span>() <span style="color:#66d9ef">interface</span>{}
-</code></pre></div><p>All my tasks have to conform to this function type. The result of the function can be some primitive type (integer or string) or a slice, or even an error. It can be everything.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">TaskFunction</span> <span style="color:#66d9ef">func</span>() <span style="color:#66d9ef">interface</span>{}
+</span></span></code></pre></div><p>All my tasks have to conform to this function type. The result of the function can be some primitive type (integer or string) or a slice, or even an error. It can be everything.</p>
 <p>I define several tasks to be executed concurrently:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#75715e">// Returns an integer after pause
-</span><span style="color:#75715e"></span><span style="color:#a6e22e">slowFunction</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">func</span>() <span style="color:#66d9ef">interface</span>{} {
-    <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span>)
-    <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;slow function&#34;</span>)
-    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">2</span>
-}
-<span style="color:#75715e">// Returns a string after longer pause
-</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">verySlowFunction</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">func</span>() <span style="color:#66d9ef">interface</span>{} {
-    <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">4</span>)
-    <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;very slow function&#34;</span>)
-    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;I&#39;m ready&#34;</span>
-}
-<span style="color:#75715e">// One function returns an error
-</span><span style="color:#75715e"></span><span style="color:#a6e22e">errorFunction</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">func</span>() <span style="color:#66d9ef">interface</span>{} {
-    <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">3</span>)
-    <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;function with an error&#34;</span>)
-    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">errors</span>.<span style="color:#a6e22e">New</span>(<span style="color:#e6db74">&#34;Error in function&#34;</span>)
-}
-</code></pre></div><p>Notice that all tasks are the same signature which conforms to our function type.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#75715e">// Returns an integer after pause
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">slowFunction</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">func</span>() <span style="color:#66d9ef">interface</span>{} {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;slow function&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Returns a string after longer pause
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">verySlowFunction</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">func</span>() <span style="color:#66d9ef">interface</span>{} {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;very slow function&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;I&#39;m ready&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// One function returns an error
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">errorFunction</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">func</span>() <span style="color:#66d9ef">interface</span>{} {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;function with an error&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">errors</span>.<span style="color:#a6e22e">New</span>(<span style="color:#e6db74">&#34;Error in function&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Notice that all tasks are the same signature which conforms to our function type.</p>
 <p>One idea from the original “Go Blog” article is that each incoming task becomes a worker with an individual output channel for the result. The values from multiple output channels will be merged into one output channel. And the merged channel will be returned to the client:
 <img src="/img/async_in_golang/goasync2.png" alt="Scheme1"></p>
 <p>Let&rsquo;s implement the function which creates a new worker for incoming task function. The channel “done” will be used to orchestrate canceling of task execution across the goroutines (for example if one goroutine returns an error and you don’t want to wait for others). This channel can be any type because we don’t need to send something to it (it will be discussed later).</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">newWorker</span>(<span style="color:#a6e22e">task</span> <span style="color:#a6e22e">TaskFunction</span>, <span style="color:#a6e22e">done</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}) <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{} {
-</code></pre></div><p>As I earlier said every task becomes the new channel for the result:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{})
-</code></pre></div><p>Now we ready to implement the worker:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
-    <span style="color:#66d9ef">defer</span> close(<span style="color:#a6e22e">out</span>)
-    <span style="color:#66d9ef">select</span> {
-        <span style="color:#75715e">// Received a signal to abandon further processing
-</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">done</span>:
-           <span style="color:#66d9ef">return</span>
-        <span style="color:#75715e">// Got some result        
-</span><span style="color:#75715e"></span>       <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">task</span>():
-}
-}()
-</code></pre></div><p>Now we ready to implement the worker: The worker is an anonymous function (furthermore it is a goroutine). At first, we need to take care of our output channel. We close it via defer call. It means the output channel will be closed as soon as the worker is done.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">newWorker</span>(<span style="color:#a6e22e">task</span> <span style="color:#a6e22e">TaskFunction</span>, <span style="color:#a6e22e">done</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}) <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{} {
+</span></span></code></pre></div><p>As I earlier said every task becomes the new channel for the result:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{})
+</span></span></code></pre></div><p>Now we ready to implement the worker:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">defer</span> close(<span style="color:#a6e22e">out</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">select</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Received a signal to abandon further processing
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">done</span>:
+</span></span><span style="display:flex;"><span>           <span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Got some result        
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>       <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">task</span>():
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>}()
+</span></span></code></pre></div><p>Now we ready to implement the worker: The worker is an anonymous function (furthermore it is a goroutine). At first, we need to take care of our output channel. We close it via defer call. It means the output channel will be closed as soon as the worker is done.</p>
 <p>Commonly “select” statement is used for non-blocking reading from channels when it is not necessary to wait for the result. It can be achieved using the “default” statement. But it can be used to read results from several channels. In our example firstly it reads from “done” channel. It is indicating that we have to leave the worker before the task is actually done. Secondly, we execute the task and send the result to the output channel which is accessible from the worker (goroutine).
 In the end, we return the output channel. The whole function would look like:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">newWorker</span>(<span style="color:#a6e22e">task</span> <span style="color:#a6e22e">TaskFunction</span>, <span style="color:#a6e22e">done</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}) <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{} {
-    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{})
-    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
-    <span style="color:#66d9ef">defer</span> close(<span style="color:#a6e22e">out</span>)
-    <span style="color:#66d9ef">select</span> {
-        <span style="color:#75715e">// Received a signal to abandon further processing
-</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">done</span>:
-           <span style="color:#66d9ef">return</span>
-        <span style="color:#75715e">// Got some result        
-</span><span style="color:#75715e"></span>       <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">task</span>():
-    }
-   }()
- <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
-}
-</code></pre></div><p>As you can see there are no blocks in the code. The output channel will be immediately returned no matter how long would it take to complete a task. Moreover, the output channel will be eventually closed as soon as the task is completed.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">newWorker</span>(<span style="color:#a6e22e">task</span> <span style="color:#a6e22e">TaskFunction</span>, <span style="color:#a6e22e">done</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}) <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{} {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{})
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">defer</span> close(<span style="color:#a6e22e">out</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">select</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Received a signal to abandon further processing
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">done</span>:
+</span></span><span style="display:flex;"><span>           <span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Got some result        
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>       <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">task</span>():
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>   }()
+</span></span><span style="display:flex;"><span> <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>As you can see there are no blocks in the code. The output channel will be immediately returned no matter how long would it take to complete a task. Moreover, the output channel will be eventually closed as soon as the task is completed.</p>
 <p>Ok, we receive for each task a channel. What do we have to do with them? We need to merge all channels and return to the client only one merged channel.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">merge</span>(<span style="color:#a6e22e">workers</span> []<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{}, <span style="color:#a6e22e">done</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}) <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{}
-</code></pre></div><p>We send a slice with the channels from every single task and return one merged channel.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{})
-</code></pre></div><p>Here we cannot simply close the output channel via deferred call. Earlier we did that because we were sure that nobody sends more than one value to the channel. Here we have to count the workers using Go&rsquo;s sync:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
-<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(len(<span style="color:#a6e22e">workers</span>))
-</code></pre></div><p>Let&rsquo;s define the function which takes the result from the worker and pass it to the merged channel. The code is similar to our worker except there is no task execution: the result from one channel (worker channel) will be sent to the merged channel. After this, the counter will be decreased by deferred call wg.Done:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#a6e22e">output</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">c</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{}) {
-    <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
-    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">c</span> {
-        <span style="color:#66d9ef">select</span> {
-          <span style="color:#75715e">// Received a signal to abandon further processing
-</span><span style="color:#75715e"></span>          <span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">done</span>:
-            <span style="color:#66d9ef">return</span>
-          <span style="color:#75715e">// some message or nothing
-</span><span style="color:#75715e"></span>          <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">result</span>:
-        }
-    }
-}
-</code></pre></div><p>Then we execute asynchronously this function for each worker channel we do have in the slice:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">workerChannel</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">workers</span> {
-    <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">output</span>(<span style="color:#a6e22e">workerChannel</span>)
-}
-</code></pre></div><p>The last thing we have to take care of is to close the merged channel and return it to the client:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
-    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
-    close(<span style="color:#a6e22e">out</span>)
-}()
-<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
-</code></pre></div><p>We use here Golang’s WaitGroup. We wait before all workers have sent the result from task execution to the merged channel. Notice, this is a goroutine as well.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">merge</span>(<span style="color:#a6e22e">workers</span> []<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{}, <span style="color:#a6e22e">done</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}) <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{}
+</span></span></code></pre></div><p>We send a slice with the channels from every single task and return one merged channel.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{})
+</span></span></code></pre></div><p>Here we cannot simply close the output channel via deferred call. Earlier we did that because we were sure that nobody sends more than one value to the channel. Here we have to count the workers using Go&rsquo;s sync:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(len(<span style="color:#a6e22e">workers</span>))
+</span></span></code></pre></div><p>Let&rsquo;s define the function which takes the result from the worker and pass it to the merged channel. The code is similar to our worker except there is no task execution: the result from one channel (worker channel) will be sent to the merged channel. After this, the counter will be decreased by deferred call wg.Done:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#a6e22e">output</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">c</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{}) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">c</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">select</span> {
+</span></span><span style="display:flex;"><span>          <span style="color:#75715e">// Received a signal to abandon further processing
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>          <span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">done</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#75715e">// some message or nothing
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>          <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">result</span>:
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Then we execute asynchronously this function for each worker channel we do have in the slice:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">workerChannel</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">workers</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">output</span>(<span style="color:#a6e22e">workerChannel</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The last thing we have to take care of is to close the merged channel and return it to the client:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span><span style="display:flex;"><span>    close(<span style="color:#a6e22e">out</span>)
+</span></span><span style="display:flex;"><span>}()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
+</span></span></code></pre></div><p>We use here Golang’s WaitGroup. We wait before all workers have sent the result from task execution to the merged channel. Notice, this is a goroutine as well.</p>
 <p>The whole function looks like:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">merge</span>(<span style="color:#a6e22e">workers</span> []<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{}, <span style="color:#a6e22e">done</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}) <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{} {
-    <span style="color:#75715e">// Merged channel with results
-</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{})
-    <span style="color:#75715e">// Synchronisation over channels: do not close &#34;out&#34; before 
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// all tasks are completed
-</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
-<span style="color:#75715e">// Define function which waits the result from worker channel
-</span><span style="color:#75715e">// and sends this result to the merged channel.
-</span><span style="color:#75715e">// Then it decreases the counter of running tasks via wg.Done(). 
-</span><span style="color:#75715e"></span>   <span style="color:#a6e22e">output</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">c</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{}) {
-          <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
-          <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">c</span> {
-              <span style="color:#66d9ef">select</span> {
-                  <span style="color:#75715e">// Received a signal to abandon furher processing
-</span><span style="color:#75715e"></span>                  <span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">done</span>:
-                     <span style="color:#66d9ef">return</span>
-                  <span style="color:#75715e">// some message or nothing
-</span><span style="color:#75715e"></span>                  <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">result</span>:
-              }
-         }
-    }
-    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(len(<span style="color:#a6e22e">workers</span>))
-    
-    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">workerChannel</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">workers</span> {
-        <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">output</span>(<span style="color:#a6e22e">workerChannel</span>)
-    }
-    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
-        <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
-        close(<span style="color:#a6e22e">out</span>)
-    }()
-    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
-}
-</code></pre></div><p>Notice that there are no blocks in the function.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">merge</span>(<span style="color:#a6e22e">workers</span> []<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{}, <span style="color:#a6e22e">done</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}) <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{} {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Merged channel with results
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{})
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Synchronisation over channels: do not close &#34;out&#34; before 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// all tasks are completed
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Define function which waits the result from worker channel
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// and sends this result to the merged channel.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// Then it decreases the counter of running tasks via wg.Done(). 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>   <span style="color:#a6e22e">output</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">c</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">interface</span>{}) {
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">c</span> {
+</span></span><span style="display:flex;"><span>              <span style="color:#66d9ef">select</span> {
+</span></span><span style="display:flex;"><span>                  <span style="color:#75715e">// Received a signal to abandon furher processing
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                  <span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">done</span>:
+</span></span><span style="display:flex;"><span>                     <span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>                  <span style="color:#75715e">// some message or nothing
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                  <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">result</span>:
+</span></span><span style="display:flex;"><span>              }
+</span></span><span style="display:flex;"><span>         }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(len(<span style="color:#a6e22e">workers</span>))
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">workerChannel</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">workers</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">output</span>(<span style="color:#a6e22e">workerChannel</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span><span style="display:flex;"><span>        close(<span style="color:#a6e22e">out</span>)
+</span></span><span style="display:flex;"><span>    }()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Notice that there are no blocks in the function.</p>
 <p>Here is an example of how this function could be used:</p>
 <ul>
 <li>All task have to be collected into the slice:</li>
 </ul>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#a6e22e">tasks</span> <span style="color:#f92672">:=</span> []<span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">TaskFunction</span>{<span style="color:#a6e22e">task1</span>, <span style="color:#a6e22e">task2</span>, <span style="color:#a6e22e">task3</span>}
-</code></pre></div><ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#a6e22e">tasks</span> <span style="color:#f92672">:=</span> []<span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">TaskFunction</span>{<span style="color:#a6e22e">task1</span>, <span style="color:#a6e22e">task2</span>, <span style="color:#a6e22e">task3</span>}
+</span></span></code></pre></div><ul>
 <li>Initialize the channel which will orchestrate canceling of task execution:</li>
 </ul>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#a6e22e">done</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{})
-<span style="color:#66d9ef">defer</span> close(<span style="color:#a6e22e">done</span>)
-</code></pre></div><ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#a6e22e">done</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{})
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">defer</span> close(<span style="color:#a6e22e">done</span>)
+</span></span></code></pre></div><ul>
 <li>Start task execution:</li>
 </ul>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#a6e22e">resultChannel</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">PerformTasks</span>(<span style="color:#a6e22e">tasks</span>, <span style="color:#a6e22e">done</span>)
-<span style="color:#f92672">*</span> <span style="color:#a6e22e">Get</span> <span style="color:#a6e22e">results</span> <span style="color:#a6e22e">from</span> <span style="color:#a6e22e">completed</span> <span style="color:#a6e22e">tasks</span>:
-<span style="color:#e6db74">``</span><span style="color:#960050;background-color:#1e0010">`</span><span style="color:#a6e22e">Go</span>
-<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">resultChannel</span> {
-        <span style="color:#66d9ef">switch</span> <span style="color:#a6e22e">result</span>.(<span style="color:#66d9ef">type</span>) {
-        <span style="color:#66d9ef">case</span> <span style="color:#66d9ef">string</span>:
-            <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Here is a string:&#34;</span>, <span style="color:#a6e22e">result</span>.(<span style="color:#66d9ef">string</span>))
-        <span style="color:#66d9ef">case</span> <span style="color:#66d9ef">int</span>:
-            <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Here is an integer:&#34;</span>, <span style="color:#a6e22e">result</span>.(<span style="color:#66d9ef">int</span>))
-</code></pre></div><p>We can block on a loop over the result channel. The result of task execution is interface{} therefore you might need to cast it to some specific type. It can be achieved using the switch statement.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#a6e22e">resultChannel</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">PerformTasks</span>(<span style="color:#a6e22e">tasks</span>, <span style="color:#a6e22e">done</span>)
+</span></span><span style="display:flex;"><span><span style="color:#f92672">*</span> <span style="color:#a6e22e">Get</span> <span style="color:#a6e22e">results</span> <span style="color:#a6e22e">from</span> <span style="color:#a6e22e">completed</span> <span style="color:#a6e22e">tasks</span>:
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">``</span><span style="color:#960050;background-color:#1e0010">`</span><span style="color:#a6e22e">Go</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">resultChannel</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">switch</span> <span style="color:#a6e22e">result</span>.(<span style="color:#66d9ef">type</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> <span style="color:#66d9ef">string</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Here is a string:&#34;</span>, <span style="color:#a6e22e">result</span>.(<span style="color:#66d9ef">string</span>))
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> <span style="color:#66d9ef">int</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Here is an integer:&#34;</span>, <span style="color:#a6e22e">result</span>.(<span style="color:#66d9ef">int</span>))
+</span></span></code></pre></div><p>We can block on a loop over the result channel. The result of task execution is interface{} therefore you might need to cast it to some specific type. It can be achieved using the switch statement.</p>
 <p>The done channel is being closed via deferred call. That’s why we don’t need to send anything to it to say to all our goroutine to stop processing. It will trigger the case “case &lt;-done” in all selects you have seen in the code. It will stop all running goroutines and close all output channels.</p>
 <p>P.S. I still think that concurrency concept of Golang’s is great :)
 That’s it. Please find the full code on GitHub: <a href="https://github.com/nbys/asyncwork">https://github.com/nbys/asyncwork</a></p>

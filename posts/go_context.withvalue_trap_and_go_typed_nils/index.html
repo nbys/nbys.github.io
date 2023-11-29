@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-    <script>hljs.initHighlightingOnLoad();</script>
 
     <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
@@ -53,6 +50,7 @@
 </div>
 
 
+
 <div class="content-wrapper">
   <main>
     <p>There are a lot of discussions about Go 2.0 and what should be done in the upcoming major release. Some circulations were about Context. So far I haven’t heard anything optimistic about that.</p>
@@ -65,15 +63,15 @@ I decided to implement middleware to pick the corresponding template depending o
 <p>Firstly in renderTemplate function I read from Context and try to check if the object is nil (line 60, 62):</p>
 <p><img src="/img/go_context_pitfall/3.png" alt="3"></p>
 <p>That is wrong because I handle Context.Value like the output from ordinary function or map. But Context returns not some specific type but interface{}. So you have to use type assertion instead to reach underlying value and check if it’s nil:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#75715e">// Line 62 correct:
-</span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span> <span style="color:#a6e22e">t</span>.(<span style="color:#f92672">*</span><span style="color:#a6e22e">template</span>.<span style="color:#a6e22e">Template</span>) <span style="color:#f92672">==</span> <span style="color:#66d9ef">nil</span>
-</code></pre></div><p>The check in line 62 of my code was skipped.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#75715e">// Line 62 correct:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span> <span style="color:#a6e22e">t</span>.(<span style="color:#f92672">*</span><span style="color:#a6e22e">template</span>.<span style="color:#a6e22e">Template</span>) <span style="color:#f92672">==</span> <span style="color:#66d9ef">nil</span>
+</span></span></code></pre></div><p>The check in line 62 of my code was skipped.</p>
 <p>But look at line 67. Would you expect this type of assertion to be failed if “t” is nil? I expected so and I was wrong. Type assertion works perfectly here. Then I discovered what I haven’t known before: even the nil in Go has a type. If you look in debugger what type variable “t” is:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#66d9ef">nil</span> &lt;<span style="color:#f92672">*</span><span style="color:#a6e22e">temlplate</span>.<span style="color:#a6e22e">Template</span>&gt;
-</code></pre></div><p>Statements like this make more sense for me now:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#a6e22e">a</span> <span style="color:#f92672">:=</span> (<span style="color:#f92672">*</span><span style="color:#66d9ef">error</span>)(<span style="color:#66d9ef">nil</span>)
-<span style="color:#75715e">// nil for &lt;*error&gt;
-</span></code></pre></div><p>Context is not very newbie-friendly thing in Go. It is not so easy as it is stated on Go Blog. You have to understand a lot of concepts of language before even consider using it.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#66d9ef">nil</span> &lt;<span style="color:#f92672">*</span><span style="color:#a6e22e">temlplate</span>.<span style="color:#a6e22e">Template</span>&gt;
+</span></span></code></pre></div><p>Statements like this make more sense for me now:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span><span style="color:#a6e22e">a</span> <span style="color:#f92672">:=</span> (<span style="color:#f92672">*</span><span style="color:#66d9ef">error</span>)(<span style="color:#66d9ef">nil</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// nil for &lt;*error&gt;
+</span></span></span></code></pre></div><p>Context is not very newbie-friendly thing in Go. It is not so easy as it is stated on Go Blog. You have to understand a lot of concepts of language before even consider using it.</p>
 
     <a href="/"> >> Home</a>
   </main>

@@ -1,48 +1,30 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  
   <url>
     <loc>https://nbys.github.io/</loc>
     <lastmod>2021-02-21T12:45:22+01:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://nbys.github.io/posts/</loc>
     <lastmod>2021-02-21T12:45:22+01:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://nbys.github.io/posts/abap_internal_tables_sql/</loc>
     <lastmod>2021-02-21T12:45:22+01:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://nbys.github.io/posts/go_context.withvalue_trap_and_go_typed_nils/</loc>
     <lastmod>2017-08-30T14:30:46+02:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://nbys.github.io/posts/bug_unmarshal_in_loop_golang/</loc>
     <lastmod>2017-05-14T14:26:30+02:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://nbys.github.io/posts/abap_7.40_inline_loop/</loc>
     <lastmod>2016-12-01T14:20:29+02:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://nbys.github.io/posts/async_in_golang/</loc>
     <lastmod>2016-09-11T13:45:48+02:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://nbys.github.io/categories/</loc>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://nbys.github.io/tags/</loc>
   </url>
-  
 </urlset>
